@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Models } from "node-appwrite";
 import { actionsDropdownItems } from "@/constants";
@@ -35,18 +35,20 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
-  const [name, setName] = useState(file.name);
+  const [name, setName] = useState(file.name); // Initial state set from prop
   const [isLoading, setIsLoading] = useState(false);
   const [emails, setEmails] = useState<string[]>([]);
 
   const path = usePathname();
 
+  useEffect(() => {
+    setName(file.name);
+  }, [file.name]);
+
   const closeAllModals = () => {
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
-    setName(file.name);
-    //   setEmails([]);
   };
 
   const handleAction = async () => {
@@ -64,7 +66,9 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
 
     success = await actions[action.value as keyof typeof actions]();
 
-    if (success) closeAllModals();
+    if (success) {
+      closeAllModals();
+    }
 
     setIsLoading(false);
   };
@@ -160,7 +164,9 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
               className="shad-dropdown-item"
               onClick={() => {
                 setAction(actionItem);
-
+                if (actionItem.value === "rename") {
+                  setName(file.name);
+                }
                 if (
                   ["rename", "share", "delete", "details"].includes(
                     actionItem.value
