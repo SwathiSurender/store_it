@@ -1,38 +1,44 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// Merge Tailwind classes
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Safe deep clone
 export const parseStringify = (value: unknown) =>
   JSON.parse(JSON.stringify(value));
 
+// Convert file object to blob URL
 export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 
+// Convert bytes to readable file size
 export const convertFileSize = (sizeInBytes: number, digits?: number) => {
   if (sizeInBytes < 1024) {
-    return sizeInBytes + " Bytes"; // Less than 1 KB, show in Bytes
+    return sizeInBytes + " Bytes";
   } else if (sizeInBytes < 1024 * 1024) {
     const sizeInKB = sizeInBytes / 1024;
-    return sizeInKB.toFixed(digits || 1) + " KB"; // Less than 1 MB, show in KB
+    return sizeInKB.toFixed(digits || 1) + " KB";
   } else if (sizeInBytes < 1024 * 1024 * 1024) {
     const sizeInMB = sizeInBytes / (1024 * 1024);
-    return sizeInMB.toFixed(digits || 1) + " MB"; // Less than 1 GB, show in MB
+    return sizeInMB.toFixed(digits || 1) + " MB";
   } else {
     const sizeInGB = sizeInBytes / (1024 * 1024 * 1024);
-    return sizeInGB.toFixed(digits || 1) + " GB"; // 1 GB or more, show in GB
+    return sizeInGB.toFixed(digits || 1) + " GB";
   }
 };
 
+// Calculate percentage of used storage (based on 2GB max)
 export const calculatePercentage = (sizeInBytes: number) => {
-  const totalSizeInBytes = 2 * 1024 * 1024 * 1024; // 2GB in bytes
+  const totalSizeInBytes = 2 * 1024 * 1024 * 1024;
   const percentage = (sizeInBytes / totalSizeInBytes) * 100;
   return Number(percentage.toFixed(2));
 };
 
+// Get file type by extension
 export const getFileType = (fileName: string) => {
   const extension = fileName.split(".").pop()?.toLowerCase();
-
   if (!extension) return { type: "other", extension: "" };
 
   const documentExtensions = [
@@ -60,7 +66,6 @@ export const getFileType = (fileName: string) => {
     "sketch",
     "afdesign",
     "afphoto",
-    "afphoto",
   ];
   const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "svg", "webp"];
   const videoExtensions = ["mp4", "avi", "mov", "mkv", "webm"];
@@ -75,20 +80,16 @@ export const getFileType = (fileName: string) => {
   return { type: "other", extension };
 };
 
+// Format ISO string to 12-hour clock and readable date
 export const formatDateTime = (isoString: string | null | undefined) => {
   if (!isoString) return "—";
-
   const date = new Date(isoString);
 
-  // Get hours and adjust for 12-hour format
   let hours = date.getHours();
   const minutes = date.getMinutes();
   const period = hours >= 12 ? "pm" : "am";
-
-  // Convert hours to 12-hour format
   hours = hours % 12 || 12;
 
-  // Format the time and date parts
   const time = `${hours}:${minutes.toString().padStart(2, "0")}${period}`;
   const day = date.getDate();
   const monthNames = [
@@ -110,12 +111,14 @@ export const formatDateTime = (isoString: string | null | undefined) => {
   return `${time}, ${day} ${month}`;
 };
 
+export type FileType = "document" | "image" | "video" | "audio" | "other";
+
+// Return file icon path based on extension or type
 export const getFileIcon = (
   extension: string | undefined,
   type: FileType | string
 ) => {
   switch (extension) {
-    // Document
     case "pdf":
       return "/assets/icons/file-pdf.svg";
     case "doc":
@@ -129,10 +132,8 @@ export const getFileIcon = (
     case "xls":
     case "xlsx":
       return "/assets/icons/file-document.svg";
-    // Image
     case "svg":
       return "/assets/icons/file-image.svg";
-    // Video
     case "mkv":
     case "mov":
     case "avi":
@@ -143,7 +144,6 @@ export const getFileIcon = (
     case "m4v":
     case "3gp":
       return "/assets/icons/file-video.svg";
-    // Audio
     case "mp3":
     case "mpeg":
     case "wav":
@@ -172,8 +172,7 @@ export const getFileIcon = (
   }
 };
 
-// APPWRITE URL UTILS
-// Construct appwrite file URL - https://appwrite.io/docs/apis/rest#images
+// Appwrite URL Utils
 export const constructFileUrl = (bucketFileId: string) => {
   return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET}/files/${bucketFileId}/view?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`;
 };
@@ -182,8 +181,22 @@ export const constructDownloadUrl = (bucketFileId: string) => {
   return `${process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT}/storage/buckets/${process.env.NEXT_PUBLIC_APPWRITE_BUCKET}/files/${bucketFileId}/download?project=${process.env.NEXT_PUBLIC_APPWRITE_PROJECT}`;
 };
 
-// DASHBOARD UTILS
-export const getUsageSummary = (totalSpace: any) => {
+// ✅ Type-safe usage summary input type
+type FileCategoryStats = {
+  size: number;
+  latestDate: string;
+};
+
+type TotalSpace = {
+  document: FileCategoryStats;
+  image: FileCategoryStats;
+  video: FileCategoryStats;
+  audio: FileCategoryStats;
+  other: FileCategoryStats;
+};
+
+// Dashboard summary cards
+export const getUsageSummary = (totalSpace: TotalSpace) => {
   return [
     {
       title: "Documents",
@@ -219,6 +232,7 @@ export const getUsageSummary = (totalSpace: any) => {
   ];
 };
 
+// Return accepted file types for upload filtering
 export const getFileTypesParams = (type: string) => {
   switch (type) {
     case "documents":
