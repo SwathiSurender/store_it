@@ -1,11 +1,12 @@
-⚙️ Tech Stack
-React 19
-Next.js 15
-Appwrite
-TailwindCSS
-ShadCN
-TypeScript
-🔋 Features
+**Tech Stack**
+React 19,
+Next.js 15,
+Appwrite,
+TailwindCSS.
+ShadCN,
+TypeScript,
+
+**Features**
 👉 User Authentication with Appwrite: Implement signup, login, and logout functionality using Appwrite's authentication system.
 
 👉 FIle Uploads: Effortlessly upload a variety of file types, including documents, images, videos, and audio, ensuring all your important data.
